@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../constants/sizes.dart';
 import '../constants/text_styles.dart';
+import '../utils/cart_manager.dart';
 import '../widgets/custom_button.dart';
 
 class FoodDetailsScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen>
   late String title;
   late String price;
   late String imagePath;
+  int quantity = 1; // Added to track quantity
 
   @override
   void initState() {
@@ -65,6 +67,19 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen>
               height: 250,
               width: double.infinity,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 250,
+                  width: double.infinity,
+                  color: Colors.grey[300],
+                  child: const Center(
+                    child: Text(
+                      'Image not found',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                );
+              },
             ),
             Padding(
               padding: const EdgeInsets.all(AppSizes.padding),
@@ -94,12 +109,20 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen>
                         children: [
                           IconButton(
                             icon: const Icon(Icons.remove_circle_outline),
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                if (quantity > 1) quantity--;
+                              });
+                            },
                           ),
-                          const Text('1'),
+                          Text('$quantity'),
                           IconButton(
                             icon: const Icon(Icons.add_circle_outline),
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                quantity++;
+                              });
+                            },
                           ),
                         ],
                       ),
@@ -108,7 +131,14 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen>
                         child: CustomButton(
                           text: 'Add To Bag',
                           onPressed: () {
-                            // Add to cart logic later
+                            CartManager.addToCart({
+                              'title': title,
+                              'price': price,
+                              'imagePath': imagePath,
+                              'quantity': quantity,
+                            });
+                            // Navigate to CartScreen after adding
+                            Navigator.pushNamed(context, '/cart');
                           },
                         ),
                       ),
@@ -129,16 +159,14 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen>
                   const SizedBox(height: AppSizes.padding),
                   // Tab Content
                   SizedBox(
-                    height: 200, // Fixed height for tab content
+                    height: 200,
                     child: TabBarView(
                       controller: _tabController,
                       children: [
-                        // Food Details Tab
                         Text(
                           'Lorem ipsum, or lipsum as it is sometimes known, is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero\'s De Finibus Bonorum et Malorum for use in a type specimen book.',
                           style: AppTextStyles.body,
                         ),
-                        // Food Reviews Tab
                         Text('No reviews yet.', style: AppTextStyles.body),
                       ],
                     ),

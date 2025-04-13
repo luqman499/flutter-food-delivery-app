@@ -143,7 +143,7 @@ class HomeScreen extends StatelessWidget {
                           arguments: {
                             'title': 'Mixed Vegetable',
                             'price': '\$17.03',
-                            ' imagePath': 'images/recipe.jpg',
+                            'imagePath': 'images/recipe.jpg',
                           },
                         );
                       },
@@ -248,7 +248,9 @@ class HomeScreen extends StatelessWidget {
         showUnselectedLabels: true,
         currentIndex: 0,
         onTap: (index) {
-          // Handle navigation later
+          if (index == 2) {
+            Navigator.pushNamed(context, '/cart');
+          }
         },
       ),
     );
