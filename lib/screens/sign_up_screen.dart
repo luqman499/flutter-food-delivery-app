@@ -1,28 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_food_delivery/screens/sign_up_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../widgets/custom_button.dart';
 
+import '../widgets/custom_button.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/social_button.dart';
+import 'login_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+class _SignUpScreenState extends State<SignUpScreen> {
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
   final phoneController = TextEditingController();
+  final invitationCodeController = TextEditingController();
+  bool _hasNoInvitationCode = false;
 
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
     phoneController.dispose();
+    invitationCodeController.dispose();
     super.dispose();
   }
 
@@ -53,37 +56,70 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: 32),
 
-                CustomTextField(
-                  hintText: 'Email',
-                  prefixIcon: Icon(Icons.email),
-                  controller: emailController,
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        hintText: 'First Name',
+                        controller: firstNameController,
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: CustomTextField(
+                        hintText: 'Last Name',
+                        controller: lastNameController,
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 16),
 
                 CustomTextField(
                   hintText: 'Phone Number',
-                  prefixIcon: Icon(
-                    Icons.phone,
-                  ), // Fixed: Wrap Icons.phone in Icon
-                  controller: phoneController, // Fixed: Provide a controller
+                  prefixIcon: Icon(Icons.phone),
+                  controller: phoneController,
                 ),
                 SizedBox(height: 16),
 
                 CustomTextField(
-                  hintText: 'Password',
-                  prefixIcon: Icon(Icons.lock),
-                  controller: passwordController,
-                  // Fixed: Now supported by CustomTextField
+                  hintText: 'Invitation Code',
+                  prefixIcon: Icon(Icons.code),
+                  controller: invitationCodeController,
+                ),
+                SizedBox(height: 8),
+
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _hasNoInvitationCode,
+                      onChanged: (value) {
+                        setState(() {
+                          _hasNoInvitationCode = value ?? false;
+                          if (_hasNoInvitationCode) {
+                            invitationCodeController.clear();
+                          }
+                        });
+                      },
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Leave empty if you don’t have Invitation Code',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 24),
 
                 CustomButton(
-                  text: 'LOGIN',
+                  text: 'SIGN UP',
                   onPressed: () {
-                    print('Login tapped');
-                    print('Email: ${emailController.text}');
+                    print('Sign Up tapped');
+                    print('First Name: ${firstNameController.text}');
+                    print('Last Name: ${lastNameController.text}');
                     print('Phone: ${phoneController.text}');
-                    print('Password: ${passwordController.text}');
+                    print('Invitation Code: ${invitationCodeController.text}');
                   },
                 ),
                 SizedBox(height: 24),
@@ -106,14 +142,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     SocialButton(
                       letter: 'f',
                       onPressed: () {
-                        print('Facebook Login');
+                        print('Facebook Sign-Up');
                       },
                     ),
                     SizedBox(width: 24),
                     SocialButton(
                       letter: 'G',
                       onPressed: () {
-                        print('Google Login');
+                        print('Google Sign-Up');
                       },
                     ),
                   ],
@@ -125,11 +161,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => SignUpScreen()),
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
                       );
                     },
                     child: Text(
-                      'Don’t have an account? Sign Up',
+                      'Already have an account? Sign In',
                       style: TextStyle(
                         color: Colors.grey,
                         fontSize: 14,

@@ -1,41 +1,34 @@
 import 'package:flutter/material.dart';
-import '../constants/colors.dart';
-import '../constants/sizes.dart';
 
 class CustomTextField extends StatelessWidget {
   final String hintText;
-  final IconData prefixIcon;
-  final bool obscureText;
-  final bool showEyeIcon; // Added to toggle eye icon visibility
+  final Icon? prefixIcon;
+  final TextEditingController controller;
+  final ValueChanged<String>? onChanged;
 
   const CustomTextField({
-    required this.hintText,
-    required this.prefixIcon,
-    this.obscureText = false,
-    this.showEyeIcon = false, // Default to false
     super.key,
+    required this.hintText,
+    this.prefixIcon,
+    required this.controller,
+    this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
-      obscureText: obscureText,
+      controller: controller,
+      onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hintText,
-        prefixIcon: Icon(prefixIcon, color: AppColors.grey),
-        suffixIcon:
-            showEyeIcon
-                ? Icon(
-                  Icons.visibility,
-                  color: AppColors.grey,
-                ) // Added eye icon
-                : null,
+        prefixIcon: prefixIcon,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
         ),
         filled: true,
-        fillColor: Colors.grey[200],
+        fillColor: Colors.grey.shade100,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
     );
   }
