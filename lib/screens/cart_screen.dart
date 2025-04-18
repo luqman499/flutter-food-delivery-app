@@ -14,12 +14,13 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   double get totalPrice {
-    return CartManager.cartItems.fold(
-      0.0,
-      (sum, item) =>
-          sum +
-          (double.parse(item['price'].replaceAll('\$', '')) * item['quantity']),
-    );
+    return CartManager.cartItems.fold(0.0, (sum, item) {
+      final priceString =
+          item['price']?.toString().replaceAll('\$', '') ?? '0.0';
+      final price = double.tryParse(priceString) ?? 0.0;
+      final quantity = (item['quantity'] as num?)?.toDouble() ?? 1.0;
+      return sum + (price * quantity);
+    });
   }
 
   @override
@@ -62,20 +63,25 @@ class _CartScreenState extends State<CartScreen> {
                         itemBuilder: (context, index) {
                           final item = CartManager.cartItems[index];
                           return CartItem(
-                            title: item['title'],
-                            price: item['price'],
-                            imagePath: item['imagePath'],
-                            quantity: item['quantity'],
+                            title: item['title']?.toString() ?? 'Unknown Item',
+                            price: item['price']?.toString() ?? '\$0.00',
+                            imagePath: item['imagePath']?.toString() ?? '',
+                            quantity: (item['quantity'] as num?)?.toInt() ?? 1,
                             onIncrement: () {
                               setState(() {
-                                CartManager.cartItems[index]['quantity']++;
+                                final currentQuantity =
+                                    (item['quantity'] as num?)?.toInt() ?? 1;
+                                CartManager.cartItems[index]['quantity'] =
+                                    currentQuantity + 1;
                               });
                             },
                             onDecrement: () {
                               setState(() {
-                                if (CartManager.cartItems[index]['quantity'] >
-                                    1) {
-                                  CartManager.cartItems[index]['quantity']--;
+                                final currentQuantity =
+                                    (item['quantity'] as num?)?.toInt() ?? 1;
+                                if (currentQuantity > 1) {
+                                  CartManager.cartItems[index]['quantity'] =
+                                      currentQuantity - 1;
                                 }
                               });
                             },
@@ -111,11 +117,12 @@ class _CartScreenState extends State<CartScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        CartManager.cartItems[0]['title'],
+                        CartManager.cartItems[0]['title']?.toString() ??
+                            'Unknown Item',
                         style: AppTextStyles.body,
                       ),
                       Text(
-                        '\$${CartManager.cartItems[0]['price'].replaceAll('\$', '')}',
+                        '\$${CartManager.cartItems[0]['price']?.toString().replaceAll('\$', '') ?? '0.00'}',
                         style: AppTextStyles.body,
                       ),
                     ],
@@ -126,11 +133,12 @@ class _CartScreenState extends State<CartScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          CartManager.cartItems[1]['title'],
+                          CartManager.cartItems[1]['title']?.toString() ??
+                              'Unknown Item',
                           style: AppTextStyles.body,
                         ),
                         Text(
-                          '\$${CartManager.cartItems[1]['price'].replaceAll('\$', '')}',
+                          '\$${CartManager.cartItems[1]['price']?.toString().replaceAll('\$', '') ?? '0.00'}',
                           style: AppTextStyles.body,
                         ),
                       ],

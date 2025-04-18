@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_food_delivery/screens/sign_up_screen.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../widgets/custom_button.dart';
-
-import '../widgets/custom_text_field.dart';
-import '../widgets/social_button.dart';
+import '../services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,131 +10,209 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final ApiService _apiService = ApiService();
+  bool _isLoading = false;
+
+  Future<void> _signIn() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final data = await _apiService.login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      if (data != null && data['access_token'] != null) {
+        // Verify token storage
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('access_token');
+        if (token != null && mounted) {
+          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+        } else {
+          throw Exception('Token storage failed');
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Login failed. Please check your credentials.'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.restaurant_menu, color: Colors.black, size: 30),
-                    SizedBox(width: 8),
-                    Text(
-                      'hellofood',
-                      style: GoogleFonts.poppins(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.restaurant, color: Colors.black),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        'hellofood',
+                        style: TextStyle(
+                          color: Colors.orange,
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      hintText: 'Email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                  ],
-                ),
-                SizedBox(height: 32),
-
-                CustomTextField(
-                  hintText: 'Email',
-                  prefixIcon: Icon(Icons.email),
-                  controller: emailController,
-                ),
-                SizedBox(height: 16),
-
-                CustomTextField(
-                  hintText: 'Phone Number',
-                  prefixIcon: Icon(
-                    Icons.phone,
-                  ), // Fixed: Wrap Icons.phone in Icon
-                  controller: phoneController, // Fixed: Provide a controller
-                ),
-                SizedBox(height: 16),
-
-                CustomTextField(
-                  hintText: 'Password',
-                  prefixIcon: Icon(Icons.lock),
-                  controller: passwordController,
-                  // Fixed: Now supported by CustomTextField
-                ),
-                SizedBox(height: 24),
-
-                CustomButton(
-                  text: 'LOGIN',
-                  onPressed: () {
-                    print('Login tapped');
-                    print('Email: ${emailController.text}');
-                    print('Phone: ${phoneController.text}');
-                    print('Password: ${passwordController.text}');
-                  },
-                ),
-                SizedBox(height: 24),
-
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.grey)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Or', style: TextStyle(color: Colors.grey)),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 8.0),
+                  TextField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
                     ),
-                    Expanded(child: Divider(color: Colors.grey)),
-                  ],
-                ),
-                SizedBox(height: 24),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SocialButton(
-                      letter: 'f',
-                      onPressed: () {
-                        print('Facebook Login');
-                      },
-                    ),
-                    SizedBox(width: 24),
-                    SocialButton(
-                      letter: 'G',
-                      onPressed: () {
-                        print('Google Login');
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 24),
-
-                Center(
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignUpScreen()),
-                      );
-                    },
+                    obscureText: true, // Hide password input
+                  ),
+                  const SizedBox(height: 8.0),
+                  Align(
+                    alignment: Alignment.centerRight,
                     child: Text(
-                      'Don’t have an account? Sign Up',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 14,
-                        decoration: TextDecoration.underline,
-                      ),
+                      'Forget your password?',
+                      style: TextStyle(color: Colors.grey),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16.0),
+                  SizedBox(
+                    width: double.infinity,
+                    child:
+                        _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : ElevatedButton(
+                              onPressed: _signIn, // Directly use _signIn
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.pink,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16.0,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                              ),
+                              child: const Text('SIGN IN'),
+                            ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text('Or', style: TextStyle(color: Colors.grey)),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 16.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.pink[100],
+                        child: const Icon(Icons.facebook, color: Colors.pink),
+                      ),
+                      const SizedBox(width: 16.0),
+                      CircleAvatar(
+                        backgroundColor: Colors.pink[100],
+                        child: const Icon(
+                          Icons.g_mobiledata,
+                          color: Colors.pink,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16.0),
+                  Text.rich(
+                    TextSpan(
+                      text: "Don't have an account? ",
+                      style: const TextStyle(color: Colors.black),
+                      children: [
+                        WidgetSpan(
+                          child: GestureDetector(
+                            onTap:
+                                _isLoading
+                                    ? null
+                                    : () {
+                                      Navigator.pushNamed(context, '/signup');
+                                    },
+                            child: const Text(
+                              "Sign Up",
+                              style: TextStyle(
+                                color: Colors.orange,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

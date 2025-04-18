@@ -36,7 +36,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen>
   Widget build(BuildContext context) {
     // Extract arguments passed from HomeScreen
     final arguments =
-        ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+        ModalRoute.of(context)?.settings.arguments as Map<String, String>;
     title = arguments['title'] ?? 'Food Item';
     price = arguments['price'] ?? '\$0.00';
     imagePath = arguments['imagePath'] ?? '';
