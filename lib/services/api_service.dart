@@ -61,7 +61,7 @@ class ApiService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('access_token');
     } catch (e) {
-      print('Error clearing token: $e');
+      print('Error in the token: $e');
       throw Exception('Failed to clear token: $e');
     }
   }
